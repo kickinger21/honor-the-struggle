@@ -7,4 +7,4 @@
   If you change a price, change it here AND in index.html.
 
 Netlify needs one environment variable: `STRIPE_SECRET_KEY`.
-Orders close end of day November 20, 2026 (Detroit time).
+Orders close end of day November 21, 2026 (Detroit time).

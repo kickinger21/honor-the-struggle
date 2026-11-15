@@ -58,6 +58,11 @@ label .opt{font-size:12px}
 [hidden]{display:none!important}
 .deadline{background:var(--surface);border:1px solid var(--lime);border-radius:12px;padding:12px 14px;font-size:15px;margin-top:6px}
 .deadline b{color:var(--lime)}
+.pre-tag{display:inline-block;background:var(--lime);color:var(--lime-ink);font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:2px 10px;margin-bottom:10px}
+.pre-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:17px}
+.pre-row span{color:var(--muted)}
+.pre-row b{color:var(--fg)!important;font-size:19px;text-align:right}
+.pre-note{margin:10px 0 0;color:var(--muted);font-size:15px}
 .deliv{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .deliv legend{font-size:14px;color:var(--muted);margin-bottom:6px;padding:0}
 .opt-row{flex-direction:row!important;align-items:center;gap:12px!important;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;color:var(--fg)!important}
@@ -133,6 +138,7 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
 .fit p{margin:10px 12px;font-size:14px}
 .fit .tablebox{margin:0 12px;background:var(--surface)}
 .fit .note{font-size:13px}
+#ship-quote,#mail-note,#venmo-note,#venmo-help{display:none!important}
 </style>
 
 <div class="wrap" id="tabwrap" hidden>
@@ -178,8 +184,12 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
   <header>
     <div class="eyebrow">Next Level Fitness Academy</div>
     <h1><span>Honor the</span><span>Struggle</span></h1>
-    <p class="lede">Pick your gear and sizes. Your total updates as you go. Front and back print on everything.</p>
-    <div class="deadline" id="deadline"><b>Orders close Friday, November 20.</b> Pick up free in Warren, MI, or have it mailed. Shipping is figured from your ZIP code at checkout.</div>
+    <div class="deadline" id="deadline">
+      <div class="pre-tag">Pre-order</div>
+      <div class="pre-row"><span>Order by</span><b>Saturday, Nov 21</b></div>
+      <div class="pre-row"><span>Ready or ships</span><b>Around Dec 14</b></div>
+      <p class="pre-note">Everything is made after orders close. Pick up free in Warren, MI, or have it shipped.</p>
+    </div>
     <div class="steps"><div><b>1</b>Pick color and size</div><div><b>2</b>Add your name</div><div><b>3</b>Choose pickup or shipping</div><div><b>4</b>Pay by card or Venmo</div></div>
   </header>
 
@@ -192,11 +202,11 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
   </div>
   <fieldset class="deliv">
     <legend>Pickup or shipping? <span class="req">Required</span></legend>
-    <label class="opt-row"><input type="radio" name="delivery" id="d-pickup" value="pickup"><span><b>Pick up in Warren, MI</b><small>Free</small></span></label>
-    <label class="opt-row"><input type="radio" name="delivery" id="d-mail" value="mail"><span><b>Ship it to me</b><small>USPS Ground, priced by your ZIP code and what you order</small></span></label>
+    <label class="opt-row"><input type="radio" name="delivery" id="d-pickup" value="pickup"><span><b>Pick up in Warren, MI</b><small>Free. Ready in 3 to 4 weeks. Pay by card or Venmo</small></span></label>
+    <label class="opt-row"><input type="radio" name="delivery" id="d-mail" value="mail"><span><b>Ship it to me</b><small>Ships in 3 to 4 weeks by USPS Ground, priced by your ZIP code and what you order. Card payment only</small></span></label>
     <label id="zip-wrap" hidden>Your ZIP code<input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="5-digit ZIP"></label>
     <p class="note" id="ship-quote" hidden></p>
-    <p class="note" id="mail-note" hidden>Paying by card? Checkout asks for your mailing address. Paying with Venmo? Message Coach Chad your address after you pay, and keep it out of the Venmo note, since Venmo payments can be public.</p>
+    <p class="note" id="mail-note" hidden>Checkout will ask for your mailing address. Shipped orders are paid by card or Apple Pay. Venmo is for pickup orders only.</p>
   </fieldset>
   <div class="summary">
     <div class="receipt-h">Your order</div>
@@ -204,9 +214,9 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
     <div class="rtotal"><span>Total</span><b id="rtotal">$0</b></div>
     <p id="err" class="err" hidden></p>
     <button id="card" class="btn" type="button">Pay with card or Apple Pay</button>
-    <p class="note">Secure checkout by Stripe. You'll get an email receipt.</p>
-    <a id="venmo" class="btn ghost" href="#" target="_blank" rel="noopener">Pay with Venmo instead</a>
-    <p class="note">Venmo opens with your total and order already filled in. Just hit Pay and you're done.</p>
+    <p class="note">Secure checkout. Receipt emailed to you.</p>
+    <a id="venmo" class="btn ghost" href="#" target="_blank" rel="noopener">Pay with Venmo (pickup only)</a>
+    <p class="note" id="venmo-note">Venmo opens with your total and order already filled in. Just hit Pay and you're done.</p>
     <p class="note" id="venmo-help" hidden>Venmo didn't open? Send <b id="vh-amt"></b> to <b class="sel">@Chad-Demchik</b> on Venmo and put your name and items in the note.</p>
     <button id="save" class="btn ghost" hidden>Save straight to master list</button>
     <p id="save-msg" class="okmsg" hidden></p>
@@ -262,7 +272,7 @@ const label=(p,color)=>p.name+(multi(p)?", "+color:"");
 const $ = s=>document.querySelector(s);
 const money = n=>{n=Math.round(n*100)/100;return "$"+(Number.isInteger(n)?n.toLocaleString():n.toFixed(2))};
 const SHIP = 5.99;
-const CLOSE = new Date(2026,10,21,0,0,0); /* orders close end of day Nov 20, 2026 (viewer's local time) */
+const CLOSE = new Date("2026-11-22T05:00:00Z"); /* orders close end of day Nov 21, 2026, Detroit time */
 const isClosed = ()=>new Date()>=CLOSE;
 const delivery = ()=>{const r=document.querySelector('input[name="delivery"]:checked');return r?r.value:""};
 /* Shipping: USPS Ground Advantage retail prices (Notice 123, effective Oct 4, 2026), mailed from Warren, MI 48093.
@@ -341,6 +351,7 @@ function items(){
 function update(){
   const it=items(); const sub=it.reduce((a,b)=>a+b.cost,0); const total=it.length?sub+shipCost():0; const n=it.reduce((a,b)=>a+b.qty,0);
   $("#mail-note").hidden=delivery()!=="mail"; $("#zip-wrap").hidden=delivery()!=="mail";
+  {const ship=delivery()!=="pickup"; $("#venmo").hidden=ship; $("#venmo-note").hidden=ship; if(ship) $("#venmo-help").hidden=true;}
   {const q=delivery()==="mail"?shipQuote(it,zipVal()):null, sq=$("#ship-quote"); sq.hidden=!q; if(q) sq.textContent=`Shipping to ${zipVal()}: ${money(q.price)} for ${it.reduce((a,b)=>a+b.qty,0)} item${it.reduce((a,b)=>a+b.qty,0)===1?"":"s"}.`;}
   $("#total").textContent=money(total); $("#count").textContent=n+(n===1?" item":" items");
   const ul=$("#summary"); ul.innerHTML=""; $("#rtotal").textContent=money(total);
@@ -348,7 +359,7 @@ function update(){
   it.forEach(x=>{const li=document.createElement("li");const a=document.createElement("span");a.textContent=`${x.qty} x ${x.p.name}`;const s=document.createElement("small");s.textContent=`${x.color}, size ${x.size}`;a.appendChild(s);const b=document.createElement("b");b.textContent=money(x.cost);li.append(a,b);ul.appendChild(li)});
   {const dv=delivery();const li=document.createElement("li");const a=document.createElement("span");const b=document.createElement("b");
    if(dv==="mail"){const q=shipQuote(it,zipVal());
-     if(q){a.textContent="Shipping to "+zipVal();const sm=document.createElement("small");sm.textContent=`USPS Ground, about ${Math.ceil(q.lb)} lb`;a.appendChild(sm);b.textContent=money(q.price)}
+     if(q){a.textContent="Shipping to "+zipVal();b.textContent=money(q.price)}
      else{li.className="need-line";a.textContent=zipVal().length===5?"We couldn't find that ZIP code. Double check it.":"Enter your ZIP code to see shipping";b.textContent=""}}
    else if(dv==="pickup"){a.textContent="Pickup in Warren, MI";b.textContent="Free"}
    else{li.className="need-line";a.textContent="Pickup or shipping not chosen yet";b.textContent=""}
@@ -357,14 +368,14 @@ function update(){
 }
 function orderLines(){
   const it=items(), total=it.reduce((a,b)=>a+b.cost,0)+shipCost(), name=$("#name").value.trim();
-  return ["HONOR THE STRUGGLE","Name: "+(name||"(add your name)")].concat(it.map(x=>`${x.qty} x ${label(x.p,x.color)}, ${x.size}`)).concat(delivery()==="mail"?["Delivery: SHIP (Mail)","Shipping: "+money(shipCost())]:["Delivery: Pickup"]).concat(["Total: "+money(total)]);
+  return ["HONOR THE STRUGGLE PRE-ORDER","Name: "+(name||"(add your name)")].concat(it.map(x=>`${x.qty} x ${label(x.p,x.color)}, ${x.size}`)).concat(delivery()==="mail"?["Delivery: SHIP (Mail)","Shipping: "+money(shipCost())]:["Delivery: Pickup"]).concat(["Total: "+money(total)]);
 }
 $("#name").addEventListener("input",update);
 $("#zip").addEventListener("input",e=>{const v=e.target.value.replace(/\D/g,"").slice(0,5);if(v!==e.target.value)e.target.value=v;update()});
 document.querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener("change",update));
 if(isClosed()){$("#deadline").innerHTML="<b>Orders are closed.</b> Thanks to everyone who ordered!";$("#venmo").textContent="Orders are closed";$("#venmo").classList.add("off");}
 const orderProblem=()=>{const name=$("#name").value.trim(); const it=items();
-  return isClosed()?"Orders closed on November 20.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":""};
+  return isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":""};
 $("#card").addEventListener("click",async()=>{
   const err=$("#err"); err.hidden=true; const btn=$("#card");
   const msg=orderProblem();
@@ -383,7 +394,7 @@ $("#card").addEventListener("click",async()=>{
   btn.disabled=false; btn.textContent=label;
 });
 {const q=new URLSearchParams(location.search);
- if(q.get("paid")){const d=$("#deadline");d.innerHTML="<b>You're all set. Thanks for your order!</b> Your receipt is on its way to your email. Coach Chad will text you when it's ready.";d.scrollIntoView();history.replaceState(null,"",location.pathname)}
+ if(q.get("paid")){const d=$("#deadline");d.innerHTML='<div class="pre-tag">Order received</div><p style="margin:0 0 8px;font-size:20px"><b>Thank you for your order!</b></p><div class="pre-row"><span>Receipt</span><b>Emailed to you</b></div><div class="pre-row"><span>Approx. ship date</span><b>Around Dec 14</b></div><p class="pre-note">You will be notified when your order is available or ships.</p>';d.scrollIntoView();history.replaceState(null,"",location.pathname)}
  else if(q.get("canceled")){
    try{const c=JSON.parse(sessionStorage.getItem("hts-cart")||"null");
      if(c){P.forEach(p=>{if(Array.isArray(c.lines&&c.lines[p.id])){lines[p.id]=c.lines[p.id].filter(l=>p.colors.some(x=>x[0]===l.color)&&(l.size===""||p.price[l.size]!=null)).map(l=>({color:l.color,size:l.size,qty:Math.min(10,Math.max(1,l.qty|0))}));if(!lines[p.id].length)lines[p.id]=[{color:p.colors[0][0],size:"",qty:1}];shown[p.id]=lines[p.id][0].color}});
@@ -394,7 +405,7 @@ $("#jump").onclick=()=>{ $(items().length?"#info-h":"#products").scrollIntoView(
 $("#venmo").addEventListener("click",e=>{
   const err=$("#err"); err.hidden=true;
   const name=$("#name").value.trim(); const it=items();
-  const msg=isClosed()?"Orders closed on November 20.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":!VENMO?"Venmo isn't connected yet. Check back soon.":"";
+  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":!VENMO?"Venmo isn't connected yet. Check back soon.":"";
   if(msg){e.preventDefault();err.textContent=msg;err.hidden=false;
     if(!delivery()&&it.length&&name){const f=$(".deliv");f.classList.add("need");f.scrollIntoView({behavior:"smooth",block:"center"})}
     return}

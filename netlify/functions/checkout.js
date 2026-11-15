@@ -53,7 +53,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Use POST." });
   if (!process.env.STRIPE_SECRET_KEY)
     return json(500, { error: "Card payments aren't set up yet. Please use Venmo for now." });
-  if (Date.now() >= CLOSE.getTime()) return json(400, { error: "Orders closed on November 20." });
+  if (Date.now() >= CLOSE.getTime()) return json(400, { error: "Orders closed on November 21." });
 
   let body;
   try {
@@ -113,15 +113,15 @@ exports.handler = async (event) => {
     })),
     metadata: meta,
     payment_intent_data: {
-      description: `Honor the Struggle order: ${name}`.slice(0, 200),
+      description: `Honor the Struggle pre-order: ${name}`.slice(0, 200),
       metadata: meta,
     },
     custom_text: {
       submit: {
         message:
           delivery === "mail"
-            ? `Shipping by USPS Ground to ZIP ${zip}. Please use an address in that ZIP code.`
-            : "Pickup is free in Warren, MI. Coach Chad will text you when it's ready.",
+            ? `Pre-order: printed after orders close Nov 21 and shipped in 3 to 4 weeks by USPS Ground to ZIP ${zip}. Please use an address in that ZIP code.`
+            : "Pre-order: printed after orders close Nov 21 and ready for free pickup in Warren, MI in 3 to 4 weeks.",
       },
     },
   };
