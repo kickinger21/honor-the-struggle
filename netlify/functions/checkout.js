@@ -108,7 +108,7 @@ exports.handler = async (event) => {
       price_data: {
         currency: "usd",
         unit_amount: x.cents,
-        product_data: { name: x.name, description: `${x.color}, size ${x.size}` },
+        product_data: { name: x.name, description: x.size === "One size" ? `${x.color}, one size` : `${x.color}, size ${x.size}` },
       },
     })),
     metadata: meta,
