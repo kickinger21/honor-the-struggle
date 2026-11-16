@@ -205,7 +205,6 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
   <h2 id="info-h">Order and pay</h2>
   <div class="info">
     <label for="name"><span>Your full name <span class="req">Required</span></span><input id="name" autocomplete="name" placeholder="First and last name"></label>
-    <label for="phone" id="phone-wrap" hidden>Phone number<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="So we can text you when it's ready"></label>
   </div>
   <fieldset class="deliv">
     <legend>Pickup or shipping? <span class="req">Required</span></legend>
@@ -220,8 +219,8 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
     <ul id="summary" class="receipt"><li class="empty">Nothing picked yet. Choose a size on any item above.</li></ul>
     <div class="rtotal"><span>Total</span><b id="rtotal">$0</b></div>
     <p id="err" class="err" hidden></p>
-    <button id="card" class="btn" type="button">Complete checkout</button>
-    <button id="venmo" class="btn" type="button">Pay with Venmo (pickup only)</button>
+    <button id="card" class="btn" type="button">Complete checkout with card</button>
+    <button id="venmo" class="btn" type="button">Complete checkout with Venmo</button>
     <p class="note" id="venmo-note"></p>
     <div id="vconf" class="vconf" hidden>
       <div class="pre-tag">Order saved</div>
@@ -229,10 +228,10 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
       <div class="pre-row"><span>Ordered by</span><b id="vc-name"></b></div>
       <ul id="vc-list" class="receipt"></ul>
       <div class="rtotal"><span>Send on Venmo</span><b id="vc-amt"></b></div>
-      <a id="vc-pay" class="btn" href="#">Open Venmo and pay</a>
-      <p class="note">Your order is already saved, so the Venmo note is just your order number and name. Venmo didn't open? Send <b id="vc-amt2"></b> to <b class="sel">@Chad-Demchik</b> with <b id="vc-code2"></b> and your full name in the note. Screenshot this for your records.</p>
+      <a id="vc-pay" class="btn" href="#">Proceed with Venmo payment</a>
+      <p class="note">(Screenshot this for your records)<span hidden><b id="vc-amt2"></b><b id="vc-code2"></b></span></p>
     </div>
-    <form name="venmo-order" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="bot-field"><input name="order_number"><input name="name"><input name="phone"><input name="items"><input name="total"><input name="delivery"></form>
+    <form name="venmo-order" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="bot-field"><input name="order_number"><input name="name"><input name="items"><input name="total"><input name="delivery"></form>
     <button id="save" class="btn ghost" hidden>Save straight to master list</button>
     <p id="save-msg" class="okmsg" hidden></p>
   </div>
@@ -372,7 +371,7 @@ function items(){
 function update(){
   const it=items(); const sub=it.reduce((a,b)=>a+b.cost,0); const total=it.length?sub+shipCost():0; const n=it.reduce((a,b)=>a+b.qty,0);
   $("#mail-note").hidden=delivery()!=="mail"; $("#zip-wrap").hidden=delivery()!=="mail";
-  {const ship=delivery()!=="pickup"; $("#venmo").hidden=ship; $("#phone-wrap").hidden=ship; if(!vSaving) $("#vconf").hidden=true;}
+  {const ship=delivery()!=="pickup"; $("#venmo").hidden=ship; if(!vSaving) $("#vconf").hidden=true;}
   {const q=delivery()==="mail"?shipQuote(it,zipVal()):null, sq=$("#ship-quote"); sq.hidden=!q; if(q) sq.textContent=`Shipping to ${zipVal()}: ${money(q.price)} for ${it.reduce((a,b)=>a+b.qty,0)} item${it.reduce((a,b)=>a+b.qty,0)===1?"":"s"}.`;}
   $("#total").textContent=money(total); $("#count").textContent=n+(n===1?" item":" items");
   const ul=$("#summary"); ul.innerHTML=""; $("#rtotal").textContent=money(total);
@@ -423,7 +422,6 @@ $("#card").addEventListener("click",async()=>{
    const e=$("#err");e.textContent="Checkout was canceled, so you weren't charged. Your picks are below if you want to try again.";e.hidden=false;history.replaceState(null,"",location.pathname)}}
 if(isClosed()){$("#card").textContent="Orders are closed";$("#card").classList.add("off");}
 
-$("#phone").addEventListener("input",update);
 var vSaving=false, vSaved=null;
 function newCode(){const c="23456789ABCDEFGHJKMNPQRSTUVWXYZ";let o="";const r=crypto.getRandomValues(new Uint8Array(4));r.forEach(n=>o+=c[n%c.length]);return "HTS-"+o}
 function venmoLink(amount,note){
@@ -434,21 +432,20 @@ function venmoLink(amount,note){
 }
 $("#venmo").addEventListener("click",async()=>{
   const err=$("#err"); err.hidden=true;
-  const name=$("#name").value.trim(), phone=$("#phone").value.trim(), it=items();
-  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":(()=>{const m=it.find(x=>!x.color);return m?`Pick a color for your ${m.p.name}.`:""})()||(!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":phone.replace(/\D/g,"").length<10?"Add your phone number so we can text you when it's ready.":"");
+  const name=$("#name").value.trim(), it=items();
+  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":(()=>{const m=it.find(x=>!x.color);return m?`Pick a color for your ${m.p.name}.`:""})()||(!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":"");
   if(msg){err.textContent=msg;err.hidden=false;
     if(!delivery()&&it.length&&name){const f=$(".deliv");f.classList.add("need");f.scrollIntoView({behavior:"smooth",block:"center"})}
-    else if(delivery()==="pickup"&&name&&it.length) $("#phone").focus();
     return}
   const total=Math.round(it.reduce((a,b)=>a+b.cost,0)*100)/100;
   const list=it.map(x=>`${x.qty} x ${x.p.name}, ${x.color}, ${x.size==="One size"?"one size":"size "+x.size} (${money(x.cost)})`);
-  const sig=JSON.stringify([name,phone,list,total]);
+  const sig=JSON.stringify([name,list,total]);
   const btn=$("#venmo"), label=btn.textContent;
   let code, saved;
   if(vSaved&&vSaved.sig===sig){code=vSaved.code;saved=vSaved.ok}
   else{
     code=newCode(); btn.disabled=true; btn.textContent="Saving your order...";
-    const body=new URLSearchParams({"form-name":"venmo-order",order_number:code,name,phone,items:list.join("\n"),total:money(total),delivery:"Pickup in Warren (Venmo)"});
+    const body=new URLSearchParams({"form-name":"venmo-order",order_number:code,name,items:list.join("\n"),total:money(total),delivery:"Pickup in Warren (Venmo)"});
     try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});saved=r.ok}catch(_){saved=false}
     btn.disabled=false; btn.textContent=label;
     vSaved={sig,code,ok:saved};
