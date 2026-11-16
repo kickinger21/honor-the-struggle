@@ -36,6 +36,8 @@ h2{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size
 .prices{display:flex;flex-wrap:wrap;gap:6px}
 .prices span{font-size:13px;background:var(--raised);border-radius:6px;padding:3px 8px;color:var(--muted);font-variant-numeric:tabular-nums}
 .prices span b{color:var(--fg);font-weight:600}
+.prices .from{background:none;padding:0;font-size:17px;color:var(--muted)}
+.prices .from b{font-size:20px}
 .line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
 .line .csel{grid-column:1/-1}
 .colors{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -138,7 +140,11 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
 .fit p{margin:10px 12px;font-size:14px}
 .fit .tablebox{margin:0 12px;background:var(--surface)}
 .fit .note{font-size:13px}
-#ship-quote,#mail-note,#venmo-note,#venmo-help{display:none!important}
+#ship-quote,#mail-note,#venmo-note{display:none!important}
+.vconf{margin-top:14px;border:2px solid var(--lime);border-radius:14px;padding:16px}
+.vconf .code{font-size:22px;margin:6px 0 10px}
+.vconf .btn{margin-top:12px}
+.vconf .pre-tag{display:inline-block}
 </style>
 
 <div class="wrap" id="tabwrap" hidden>
@@ -193,12 +199,13 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
     <div class="steps"><div><b>1</b>Pick color and size</div><div><b>2</b>Add your name</div><div><b>3</b>Choose pickup or shipping</div><div><b>4</b>Pay by card or Venmo</div></div>
   </header>
 
-  <h2>Pick your gear</h2>
+  <h2>Pick your apparel</h2>
   <div id="products" class="wrap" style="padding:0"></div>
 
   <h2 id="info-h">Order and pay</h2>
   <div class="info">
     <label for="name">Your full name<input id="name" autocomplete="name" placeholder="First and last name"></label>
+    <label for="phone" id="phone-wrap" hidden>Phone number<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="So we can text you when it's ready"></label>
   </div>
   <fieldset class="deliv">
     <legend>Pickup or shipping? <span class="req">Required</span></legend>
@@ -215,9 +222,18 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
     <p id="err" class="err" hidden></p>
     <button id="card" class="btn" type="button">Pay with card or Apple Pay</button>
     <p class="note">Secure checkout. Receipt emailed to you.</p>
-    <a id="venmo" class="btn ghost" href="#" target="_blank" rel="noopener">Pay with Venmo (pickup only)</a>
-    <p class="note" id="venmo-note">Venmo opens with your total and order already filled in. Just hit Pay and you're done.</p>
-    <p class="note" id="venmo-help" hidden>Venmo didn't open? Send <b id="vh-amt"></b> to <b class="sel">@Chad-Demchik</b> on Venmo and put your name and items in the note.</p>
+    <button id="venmo" class="btn ghost" type="button">Pay with Venmo (pickup only)</button>
+    <p class="note" id="venmo-note"></p>
+    <div id="vconf" class="vconf" hidden>
+      <div class="pre-tag">Order saved</div>
+      <p class="code">Order <b id="vc-code"></b></p>
+      <div class="pre-row"><span>Ordered by</span><b id="vc-name"></b></div>
+      <ul id="vc-list" class="receipt"></ul>
+      <div class="rtotal"><span>Send on Venmo</span><b id="vc-amt"></b></div>
+      <a id="vc-pay" class="btn" href="#">Open Venmo and pay</a>
+      <p class="note">Your order is already saved, so the Venmo note is just your order number and name. Venmo didn't open? Send <b id="vc-amt2"></b> to <b class="sel">@Chad-Demchik</b> with <b id="vc-code2"></b> and your full name in the note. Screenshot this for your records.</p>
+    </div>
+    <form name="venmo-order" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="bot-field"><input name="order_number"><input name="name"><input name="phone"><input name="items"><input name="total"><input name="delivery"></form>
     <button id="save" class="btn ghost" hidden>Save straight to master list</button>
     <p id="save-msg" class="okmsg" hidden></p>
   </div>
@@ -234,17 +250,17 @@ const DIMS = {"beanie": [760, 380], "womens": [760, 507], "ls": [760, 451], "zip
 const VENMO = "Chad-Demchik"; /* Venmo username, no @ */
 const SIZES = ["XS","S","M","L","XL","2XL","3XL","4XL","5XL","6XL","One size"];
 const P = [
-  {id:"womens", name:"Women's Performance Hoodie", sub:"Soft tri-blend, sweat-wicking, thumbholes", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":57,"3XL":60,"4XL":62}, colors:[["Black","womens"],["Grey Heather","womens_grey"]]},
+  {id:"womens", name:"Women's Performance Hoodie", sub:"Soft tri-blend, sweat-wicking, thumbholes", price:{XS:50,S:50,M:50,L:50,XL:50,"2XL":52,"3XL":55,"4XL":57}, colors:[["Black","womens"],["Grey Heather","womens_grey"]]},
   {id:"ls", name:"Performance Long Sleeve", sub:"Lightweight, sweat-wicking, unisex", price:{XS:35,S:35,M:35,L:35,XL:35,"2XL":37,"3XL":38,"4XL":40}, colors:[["Black","ls"],["Grey","ls_grey"]]},
   {id:"zip", name:"Zip-Up Hoodie", sub:"Soft French terry, lightweight, unisex", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":58}, colors:[["Black","zip"]]},
-  {id:"classic", name:"Classic Pullover Hoodie", sub:"Heavy cotton blend, unisex", price:{XS:45,S:45,M:45,L:45,XL:45,"2XL":50,"3XL":55,"4XL":55,"5XL":55}, colors:[["Black","classic"]]},
-  {id:"lace", name:"Lace Hoodie", sub:"Hockey-style laces, cotton blend fleece, men's fit", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":61,"3XL":64,"4XL":66}, colors:[["Black","lace"],["Graphite Heather","lace_charcoal"],["Athletic Heather","lace_ash"]]},
-  {id:"tee", name:"Performance Tee", sub:"Short sleeve, lightweight, sweat-wicking, unisex", price:{S:35,M:35,L:35,XL:35,"2XL":37,"3XL":38,"4XL":40,"5XL":41,"6XL":43}, colors:[["Black","tee"],["Heather Grey","tee_grey"]]},
+  {id:"classic", name:"Classic Pullover Hoodie", sub:"Heavy cotton blend, unisex", price:{XS:40,S:40,M:40,L:40,XL:40,"2XL":45,"3XL":50,"4XL":50,"5XL":50}, colors:[["Black","classic"]]},
+  {id:"lace", name:"Lace Hoodie", sub:"Hockey-style laces, cotton blend fleece, men's fit", price:{XS:50,S:50,M:50,L:50,XL:50,"2XL":56,"3XL":59,"4XL":61}, colors:[["Black","lace"],["Graphite Heather","lace_charcoal"],["Athletic Heather","lace_ash"]]},
+  {id:"tee", name:"Performance Tee", sub:"Short sleeve, lightweight, sweat-wicking, unisex", price:{S:30,M:30,L:30,XL:30,"2XL":32,"3XL":33,"4XL":35,"5XL":36,"6XL":38}, colors:[["Black","tee"],["Heather Grey","tee_grey"]]},
   {id:"beanie", name:"Beanie", sub:"Cuffed knit beanie, embroidered logo", price:{"One size":20}, colors:[["Black","beanie"]]}
 ];
 const FIT = {
   beanie:{text:true, note:"One size fits most. Stretchy knit with a 3 inch fold-up cuff where the logo is embroidered."},
-  womens:{note:"Women's cut with shaped front seams, a slightly longer back hem and thumbholes. Women's dress sizes are listed so you can match your usual size.", w:"Bust", extra:"Women's size",
+  womens:{note:"Women's cut with shaped front seams, a slightly longer back hem and thumbholes.", w:"Bust", extra:"Women's size",
     rows:{XS:["18 1/4","27 3/4","2"],S:["19 1/4","28 1/4","4-6"],M:["20 1/4","28 3/4","8-10"],L:["21 3/4","29 1/4","12-14"],XL:["23 1/4","29 3/4","16-18"],"2XL":["24 3/4","30 1/4","20-22"],"3XL":["26 3/4","30 3/4","24-26"],"4XL":["28 3/4","31 1/4","28-30"]}},
   ls:{note:"Unisex athletic fit with raglan sleeves. Women usually go down one size.",
     rows:{XS:["16","27"],S:["18","28"],M:["20","29"],L:["22 1/2","30"],XL:["24 1/2","31"],"2XL":["25 1/2","32"],"3XL":["27","33"],"4XL":["29 1/2","34"]}},
@@ -302,7 +318,8 @@ function priceChips(p){
   SIZES.filter(s=>p.price[s]!=null).forEach(s=>{
     if(cur && cur.v===p.price[s]){cur.to=s}else{cur={from:s,to:s,v:p.price[s]};groups.push(cur)}
   });
-  return groups.map(g=>`<span>${g.from===g.to?g.from:g.from+"-"+g.to} <b>${money(g.v)}</b></span>`).join("");
+  const lo=Math.min(...groups.map(g=>g.v));
+  return `<span class="from">${groups.length>1?"From ":""}<b>${money(lo)}</b></span>`;
 }
 function render(){
   const box=$("#products");
@@ -318,13 +335,13 @@ function render(){
         ${fitBlock(p)}
         <div class="lines"></div>
       </div>`;
-    c.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{shown[p.id]=b.dataset.c;lines[p.id].forEach(l=>{if(!l.size)l.color=b.dataset.c});render()});
+    c.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{shown[p.id]=b.dataset.c;const one=lines[p.id].length===1;lines[p.id].forEach(l=>{if(one||!l.size)l.color=b.dataset.c});render()});
     const fd=c.querySelector("details.fit"); if(fd) fd.addEventListener("toggle",()=>{fd.open?openFit.add(p.id):openFit.delete(p.id)});
     const lb=c.querySelector(".lines"); lb.style.display="flex"; lb.style.flexDirection="column"; lb.style.gap="10px";
     lines[p.id].forEach((l,j)=>{
       const row=document.createElement("div"); row.className="line";
-      const opts=['<option value="">Not ordering</option>'].concat(SIZES.filter(s=>p.price[s]!=null).map(s=>`<option value="${s}" ${l.size===s?"selected":""}>${s} (${money(p.price[s])})</option>`)).join("");
-      row.innerHTML=(multi(p)?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color">${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
+      const opts=['<option value="">Pick a size</option>'].concat(SIZES.filter(s=>p.price[s]!=null).map(s=>`<option value="${s}" ${l.size===s?"selected":""}>${s} (${money(p.price[s])})</option>`)).join("");
+      row.innerHTML=(multi(p)&&lines[p.id].length>1?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color">${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
         <div class="qty" ${l.size?"":"hidden"}><button aria-label="Fewer">−</button><output>${l.qty}</output><button aria-label="More">+</button></div>
         <div class="lineprice">${l.size?money(p.price[l.size]*l.qty):""}</div>`;
       const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;shown[p.id]=l.color;render()};
@@ -354,7 +371,7 @@ function items(){
 function update(){
   const it=items(); const sub=it.reduce((a,b)=>a+b.cost,0); const total=it.length?sub+shipCost():0; const n=it.reduce((a,b)=>a+b.qty,0);
   $("#mail-note").hidden=delivery()!=="mail"; $("#zip-wrap").hidden=delivery()!=="mail";
-  {const ship=delivery()!=="pickup"; $("#venmo").hidden=ship; $("#venmo-note").hidden=ship; if(ship) $("#venmo-help").hidden=true;}
+  {const ship=delivery()!=="pickup"; $("#venmo").hidden=ship; $("#phone-wrap").hidden=ship; if(!vSaving) $("#vconf").hidden=true;}
   {const q=delivery()==="mail"?shipQuote(it,zipVal()):null, sq=$("#ship-quote"); sq.hidden=!q; if(q) sq.textContent=`Shipping to ${zipVal()}: ${money(q.price)} for ${it.reduce((a,b)=>a+b.qty,0)} item${it.reduce((a,b)=>a+b.qty,0)===1?"":"s"}.`;}
   $("#total").textContent=money(total); $("#count").textContent=n+(n===1?" item":" items");
   const ul=$("#summary"); ul.innerHTML=""; $("#rtotal").textContent=money(total);
@@ -405,16 +422,45 @@ $("#card").addEventListener("click",async()=>{
    const e=$("#err");e.textContent="Checkout was canceled, so you weren't charged. Your picks are below if you want to try again.";e.hidden=false;history.replaceState(null,"",location.pathname)}}
 if(isClosed()){$("#card").textContent="Orders are closed";$("#card").classList.add("off");}
 $("#jump").onclick=()=>{ $(items().length?"#info-h":"#products").scrollIntoView({behavior:"smooth"}) };
-$("#venmo").addEventListener("click",e=>{
+$("#phone").addEventListener("input",update);
+var vSaving=false, vSaved=null;
+function newCode(){const c="23456789ABCDEFGHJKMNPQRSTUVWXYZ";let o="";const r=crypto.getRandomValues(new Uint8Array(4));r.forEach(n=>o+=c[n%c.length]);return "HTS-"+o}
+function venmoLink(amount,note){
+  const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const n=encodeURIComponent(note.replace(/ /g,"\u00A0")); /* Venmo turns normal spaces into + signs */
+  return mobile?`venmo://paycharge?txn=pay&recipients=${encodeURIComponent(VENMO)}&amount=${amount}&note=${n}`
+               :`https://venmo.com/${encodeURIComponent(VENMO)}?txn=pay&amount=${amount}&note=${n}`;
+}
+$("#venmo").addEventListener("click",async()=>{
   const err=$("#err"); err.hidden=true;
-  const name=$("#name").value.trim(); const it=items();
-  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":!VENMO?"Venmo isn't connected yet. Check back soon.":"";
-  if(msg){e.preventDefault();err.textContent=msg;err.hidden=false;
+  const name=$("#name").value.trim(), phone=$("#phone").value.trim(), it=items();
+  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":phone.replace(/\D/g,"").length<10?"Add your phone number so we can text you when it's ready.":"";
+  if(msg){err.textContent=msg;err.hidden=false;
     if(!delivery()&&it.length&&name){const f=$(".deliv");f.classList.add("need");f.scrollIntoView({behavior:"smooth",block:"center"})}
+    else if(delivery()==="pickup"&&name&&it.length) $("#phone").focus();
     return}
-  const total=Math.round((it.reduce((a,b)=>a+b.cost,0)+shipCost())*100)/100;
-  $("#vh-amt").textContent=money(total); $("#venmo-help").hidden=false;
-  e.currentTarget.href=`https://venmo.com/${encodeURIComponent(VENMO)}?txn=pay&amount=${total.toFixed(2)}&note=${encodeURIComponent(orderLines().join(" | "))}`;
+  const total=Math.round(it.reduce((a,b)=>a+b.cost,0)*100)/100;
+  const list=it.map(x=>`${x.qty} x ${x.p.name}, ${x.color}, ${x.size==="One size"?"one size":"size "+x.size} (${money(x.cost)})`);
+  const sig=JSON.stringify([name,phone,list,total]);
+  const btn=$("#venmo"), label=btn.textContent;
+  let code, saved;
+  if(vSaved&&vSaved.sig===sig){code=vSaved.code;saved=vSaved.ok}
+  else{
+    code=newCode(); btn.disabled=true; btn.textContent="Saving your order...";
+    const body=new URLSearchParams({"form-name":"venmo-order",order_number:code,name,phone,items:list.join("\n"),total:money(total),delivery:"Pickup in Warren (Venmo)"});
+    try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:body.toString()});saved=r.ok}catch(_){saved=false}
+    btn.disabled=false; btn.textContent=label;
+    vSaved={sig,code,ok:saved};
+  }
+  const note=saved?`Honor the Struggle ${code}, ordered by ${name}`:`Honor the Struggle ${code}. ${name}. `+it.map(x=>`${x.qty} ${x.p.name} ${x.color} ${x.size}`).join(", ");
+  $("#vc-code").textContent=code; $("#vc-name").textContent=name; $("#vc-code2").textContent=code;
+  $("#vc-amt").textContent=money(total); $("#vc-amt2").textContent=money(total);
+  const ul=$("#vc-list"); ul.innerHTML="";
+  it.forEach(x=>{const li=document.createElement("li");const a=document.createElement("span");a.textContent=`${x.qty} x ${x.p.name}`;const sm=document.createElement("small");sm.textContent=x.size==="One size"?`${x.color}, one size`:`${x.color}, size ${x.size}`;a.appendChild(sm);const b=document.createElement("b");b.textContent=money(x.cost);li.append(a,b);ul.appendChild(li)});
+  {const li=document.createElement("li");li.innerHTML="<span>Pickup in Warren, MI</span><b>Free</b>";ul.appendChild(li)}
+  $("#vc-pay").href=venmoLink(total.toFixed(2),note);
+  vSaving=true; $("#vconf").hidden=false; vSaving=false;
+  $("#vconf").scrollIntoView({behavior:"smooth",block:"center"});
 });
 render();
 

@@ -1,12 +1,12 @@
 // Catalog and shipping tables. Prices here are the ones customers are charged,
 // so change prices in BOTH this file and index.html.
 const P = [
-  {id:"womens", name:"Women's Performance Hoodie", sub:"Soft tri-blend, sweat-wicking, thumbholes", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":57,"3XL":60,"4XL":62}, colors:[["Black","womens"],["Grey Heather","womens_grey"]]},
+  {id:"womens", name:"Women's Performance Hoodie", sub:"Soft tri-blend, sweat-wicking, thumbholes", price:{XS:50,S:50,M:50,L:50,XL:50,"2XL":52,"3XL":55,"4XL":57}, colors:[["Black","womens"],["Grey Heather","womens_grey"]]},
   {id:"ls", name:"Performance Long Sleeve", sub:"Lightweight, sweat-wicking, unisex", price:{XS:35,S:35,M:35,L:35,XL:35,"2XL":37,"3XL":38,"4XL":40}, colors:[["Black","ls"],["Grey","ls_grey"]]},
   {id:"zip", name:"Zip-Up Hoodie", sub:"Soft French terry, lightweight, unisex", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":58}, colors:[["Black","zip"]]},
-  {id:"classic", name:"Classic Pullover Hoodie", sub:"Heavy cotton blend, unisex", price:{XS:45,S:45,M:45,L:45,XL:45,"2XL":50,"3XL":55,"4XL":55,"5XL":55}, colors:[["Black","classic"]]},
-  {id:"lace", name:"Lace Hoodie", sub:"Hockey-style laces, cotton blend fleece, men's fit", price:{XS:55,S:55,M:55,L:55,XL:55,"2XL":61,"3XL":64,"4XL":66}, colors:[["Black","lace"],["Graphite Heather","lace_charcoal"],["Athletic Heather","lace_ash"]]},
-  {id:"tee", name:"Performance Tee", sub:"Short sleeve, lightweight, sweat-wicking, unisex", price:{S:35,M:35,L:35,XL:35,"2XL":37,"3XL":38,"4XL":40,"5XL":41,"6XL":43}, colors:[["Black","tee"],["Heather Grey","tee_grey"]]},
+  {id:"classic", name:"Classic Pullover Hoodie", sub:"Heavy cotton blend, unisex", price:{XS:40,S:40,M:40,L:40,XL:40,"2XL":45,"3XL":50,"4XL":50,"5XL":50}, colors:[["Black","classic"]]},
+  {id:"lace", name:"Lace Hoodie", sub:"Hockey-style laces, cotton blend fleece, men's fit", price:{XS:50,S:50,M:50,L:50,XL:50,"2XL":56,"3XL":59,"4XL":61}, colors:[["Black","lace"],["Graphite Heather","lace_charcoal"],["Athletic Heather","lace_ash"]]},
+  {id:"tee", name:"Performance Tee", sub:"Short sleeve, lightweight, sweat-wicking, unisex", price:{S:30,M:30,L:30,XL:30,"2XL":32,"3XL":33,"4XL":35,"5XL":36,"6XL":38}, colors:[["Black","tee"],["Heather Grey","tee_grey"]]},
   {id:"beanie", name:"Beanie", sub:"Cuffed knit beanie, embroidered logo", price:{"One size":20}, colors:[["Black","beanie"]]}
 ];
 const ZONES=[[5,5,5],[6,9,9],[10,27,5],[28,29,5],[30,49,5],[50,59,4],[60,69,4],[70,89,4],[90,99,9],[100,129,4],[130,149,3],[150,169,3],[170,199,4],[200,246,4],[247,268,3],[270,289,4],[290,349,5],[330,349,6],[350,369,5],[370,379,4],[380,397,5],[398,399,5],[400,427,4],[430,432,3],[433,449,2],[450,459,3],[460,479,3],[480,489,2],[490,495,2],[496,497,3],[498,499,4],[500,528,4],[530,534,3],[535,549,4],[550,567,4],[570,577,5],[580,588,5],[590,599,6],[600,609,3],[610,629,4],[630,639,4],[640,658,5],[660,693,5],[700,714,5],[716,729,5],[730,749,5],[750,789,6],[790,799,7],[800,831,6],[832,838,7],[840,847,7],[850,865,7],[870,884,6],[889,898,8],[900,961,8],[962,966,9],[967,969,9],[970,994,8],[995,999,9]];
