@@ -100,7 +100,6 @@ a.btn{display:block;text-align:center;text-decoration:none}
 .bar .t small{color:var(--muted);font-size:13px}
 .bar .t b{font-family:var(--display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
 .bar .btn{padding:12px 16px;font-size:16px}
-.bar{display:none!important}
 @media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
 .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-top:20px}
 .tabs button{flex:1;font:inherit;font-weight:600;background:none;border:0;color:var(--muted);padding:10px;border-radius:9px;cursor:pointer}
@@ -343,14 +342,14 @@ function render(){
       row.innerHTML=(true?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color"><option value="" ${l.color?"":"selected"}>Pick a color</option>${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
         <div class="qty" ${l.size?"":"hidden"}><button aria-label="Fewer">−</button><output>${l.qty}</output><button aria-label="More">+</button></div>
         <div class="lineprice">${l.size?money(p.price[l.size]*l.qty):""}</div>`;
-      const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;if(l.color)shown[p.id]=l.color;render()};
-      row.querySelector("select:not(.csel)").onchange=e=>{l.size=e.target.value; if(!l.size && lines[p.id].length>1) lines[p.id].splice(j,1); render()};
+      const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;if(l.color)shown[p.id]=l.color;e.target.blur();setTimeout(render,50)};
+      row.querySelector("select:not(.csel)").onchange=e=>{l.size=e.target.value; if(!l.size && lines[p.id].length>1) lines[p.id].splice(j,1); e.target.blur(); setTimeout(render,50)};
       const [minus,plus]=row.querySelectorAll(".qty button");
       const drop=()=>{if(lines[p.id].length>1)lines[p.id].splice(j,1);else lines[p.id][0]={color:firstColor(p),size:"",qty:1};render()};
       minus.onclick=()=>{if(l.qty>1){l.qty--;render()}else drop()};
       plus.onclick=()=>{if(l.qty<10){l.qty++;render()}};
       lb.appendChild(row);
-      if(j>0||l.size){const rm=document.createElement("button");rm.className="rm";rm.textContent="Remove";rm.onclick=drop;lb.appendChild(rm)}
+      
     });
     if(on && Object.keys(p.price).length>1){const add=document.createElement("button");add.className="add";add.textContent=multi(p)?"+ Add another color or size":"+ Add another";add.onclick=()=>{lines[p.id].push({color:firstColor(p),size:"",qty:1});render()};lb.appendChild(add)}
     const old=box.querySelector(`section[data-id="${p.id}"]`);
@@ -415,11 +414,12 @@ $("#card").addEventListener("click",async()=>{
 });
 {const q=new URLSearchParams(location.search);
  if(q.get("paid")){const d=$("#deadline");d.innerHTML='<div class="pre-tag">Order received</div><p style="margin:0 0 8px;font-size:20px"><b>Thank you for your order!</b></p><div class="pre-row"><span>Receipt</span><b>Emailed to you</b></div><div class="pre-row"><span>Approx. ship date</span><b>Around Dec 14</b></div><p class="pre-note">You will be notified when your order is available or ships.</p>';d.scrollIntoView();history.replaceState(null,"",location.pathname)}
- else if(q.get("canceled")){
+ else if(q.get("canceled")||(performance.getEntriesByType&&(performance.getEntriesByType("navigation")[0]||{}).type==="back_forward")){
    try{const c=JSON.parse(sessionStorage.getItem("hts-cart")||"null");
      if(c){P.forEach(p=>{if(Array.isArray(c.lines&&c.lines[p.id])){lines[p.id]=c.lines[p.id].filter(l=>p.colors.some(x=>x[0]===l.color)&&(l.size===""||p.price[l.size]!=null)).map(l=>({color:l.color,size:l.size,qty:Math.min(10,Math.max(1,l.qty|0))}));if(!lines[p.id].length)lines[p.id]=[{color:firstColor(p),size:"",qty:1}];shown[p.id]=lines[p.id][0].color}});
        $("#name").value=c.name||""; if(c.delivery){const r=document.querySelector(`input[name="delivery"][value="${c.delivery}"]`);if(r)r.checked=true} $("#zip").value=c.zip||""; render()}}catch(_){}
-   const e=$("#err");e.textContent="Checkout was canceled, so you weren't charged. Your picks are below if you want to try again.";e.hidden=false;history.replaceState(null,"",location.pathname)}}
+   history.replaceState(null,"",location.pathname)}}
+window.addEventListener("pageshow",ev=>{if(ev.persisted){const b=$("#card");b.disabled=false;b.textContent="Complete checkout with card";$("#err").hidden=true}});
 if(isClosed()){$("#card").textContent="Orders are closed";$("#card").classList.add("off");}
 
 var vSaving=false, vSaved=null;
