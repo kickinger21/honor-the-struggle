@@ -418,8 +418,8 @@ $("#card").addEventListener("click",async()=>{
    try{const c=JSON.parse(sessionStorage.getItem("hts-cart")||"null");
      if(c){P.forEach(p=>{if(Array.isArray(c.lines&&c.lines[p.id])){lines[p.id]=c.lines[p.id].filter(l=>p.colors.some(x=>x[0]===l.color)&&(l.size===""||p.price[l.size]!=null)).map(l=>({color:l.color,size:l.size,qty:Math.min(10,Math.max(1,l.qty|0))}));if(!lines[p.id].length)lines[p.id]=[{color:firstColor(p),size:"",qty:1}];shown[p.id]=lines[p.id][0].color}});
        $("#name").value=c.name||""; if(c.delivery){const r=document.querySelector(`input[name="delivery"][value="${c.delivery}"]`);if(r)r.checked=true} $("#zip").value=c.zip||""; render()}}catch(_){}
-   history.replaceState(null,"",location.pathname)}}
-window.addEventListener("pageshow",ev=>{if(ev.persisted){const b=$("#card");b.disabled=false;b.textContent="Complete checkout with card";$("#err").hidden=true}});
+   history.replaceState(null,"",location.pathname);setTimeout(()=>$("#card").scrollIntoView({block:"center"}),150)}}
+window.addEventListener("pageshow",ev=>{if(ev.persisted){const b=$("#card");b.disabled=false;b.textContent="Complete checkout with card";$("#err").hidden=true;$("#card").scrollIntoView({block:"center"})}});
 if(isClosed()){$("#card").textContent="Orders are closed";$("#card").classList.add("off");}
 
 var vSaving=false, vSaved=null;
