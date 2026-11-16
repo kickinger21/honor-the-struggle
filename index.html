@@ -281,7 +281,7 @@ function fitBlock(p){
     <p class="note">Inches, measured on the shirt laid flat. ${f.w||"Chest"} is armpit to armpit; length is top of the shoulder to the bottom hem. Easiest check: lay a shirt you like flat, measure it the same way and pick the closest size.</p></details>`;
 }
 const lines = {}, shown = {}, openFit = new Set();
-const firstColor=p=>p.colors.length>1?"":p.colors[0][0];
+const firstColor=p=>"";
 function resetLines(){P.forEach(p=>{shown[p.id]=p.colors[0][0];lines[p.id]=[{color:firstColor(p),size:"",qty:1}]})}
 resetLines();
 const imgFor=(p,c)=>IMG[(p.colors.find(x=>x[0]===c)||p.colors[0])[1]];
@@ -341,18 +341,19 @@ function render(){
     lines[p.id].forEach((l,j)=>{
       const row=document.createElement("div"); row.className="line";
       const opts=['<option value="">Pick a size</option>'].concat(SIZES.filter(s=>p.price[s]!=null).map(s=>`<option value="${s}" ${l.size===s?"selected":""}>${s} (${money(p.price[s])})</option>`)).join("");
-      row.innerHTML=(multi(p)?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color"><option value="" ${l.color?"":"selected"}>Pick a color</option>${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
+      row.innerHTML=(true?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color"><option value="" ${l.color?"":"selected"}>Pick a color</option>${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
         <div class="qty" ${l.size?"":"hidden"}><button aria-label="Fewer">−</button><output>${l.qty}</output><button aria-label="More">+</button></div>
         <div class="lineprice">${l.size?money(p.price[l.size]*l.qty):""}</div>`;
       const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;if(l.color)shown[p.id]=l.color;render()};
       row.querySelector("select:not(.csel)").onchange=e=>{l.size=e.target.value; if(!l.size && lines[p.id].length>1) lines[p.id].splice(j,1); render()};
       const [minus,plus]=row.querySelectorAll(".qty button");
-      minus.onclick=()=>{if(l.qty>1){l.qty--;render()}};
+      const drop=()=>{if(lines[p.id].length>1)lines[p.id].splice(j,1);else lines[p.id][0]={color:firstColor(p),size:"",qty:1};render()};
+      minus.onclick=()=>{if(l.qty>1){l.qty--;render()}else drop()};
       plus.onclick=()=>{if(l.qty<10){l.qty++;render()}};
       lb.appendChild(row);
-      if(j>0){const rm=document.createElement("button");rm.className="rm";rm.textContent="Remove this one";rm.onclick=()=>{lines[p.id].splice(j,1);render()};lb.appendChild(rm)}
+      if(j>0||l.size){const rm=document.createElement("button");rm.className="rm";rm.textContent="Remove";rm.onclick=drop;lb.appendChild(rm)}
     });
-    if(on && Object.keys(p.price).length>1){const add=document.createElement("button");add.className="add";add.textContent=multi(p)?"+ Add another color or size":"+ Add another size";add.onclick=()=>{lines[p.id].push({color:firstColor(p),size:"",qty:1});render()};lb.appendChild(add)}
+    if(on && Object.keys(p.price).length>1){const add=document.createElement("button");add.className="add";add.textContent=multi(p)?"+ Add another color or size":"+ Add another";add.onclick=()=>{lines[p.id].push({color:firstColor(p),size:"",qty:1});render()};lb.appendChild(add)}
     const old=box.querySelector(`section[data-id="${p.id}"]`);
     if(old){
       const oi=old.querySelector("img"), ni=c.querySelector("img");
