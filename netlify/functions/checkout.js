@@ -29,6 +29,7 @@ function shipQuote(items, zip) {
     const per = (last - RATES[RATES.length - 2][1][col]) / 2;
     price = last + Math.ceil(lb - 10) * per;
   }
+  price = Math.max(0, price - 3); // $3 off every shipping quote, same as the page
   return { zone, lb, cents: Math.round(price * 100) };
 }
 

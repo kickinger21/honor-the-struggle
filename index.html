@@ -100,6 +100,7 @@ a.btn{display:block;text-align:center;text-decoration:none}
 .bar .t small{color:var(--muted);font-size:13px}
 .bar .t b{font-family:var(--display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
 .bar .btn{padding:12px 16px;font-size:16px}
+.bar{display:none!important}
 @media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
 .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-top:20px}
 .tabs button{flex:1;font:inherit;font-weight:600;background:none;border:0;color:var(--muted);padding:10px;border-radius:9px;cursor:pointer}
@@ -194,9 +195,8 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
       <div class="pre-tag">Pre-order</div>
       <div class="pre-row"><span>Order by</span><b>Saturday, Nov 21</b></div>
       <div class="pre-row"><span>Ready or ships</span><b>Around Dec 14</b></div>
-      <p class="pre-note">Everything is made after orders close. Pick up free in Warren, MI, or have it shipped.</p>
+      <p class="pre-note">Apparel is not stocked; it is made to order after the order window closes.</p>
     </div>
-    <div class="steps"><div><b>1</b>Pick color and size</div><div><b>2</b>Add your name</div><div><b>3</b>Choose pickup or shipping</div><div><b>4</b>Pay by card or Venmo</div></div>
   </header>
 
   <h2>Pick your apparel</h2>
@@ -204,13 +204,13 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
 
   <h2 id="info-h">Order and pay</h2>
   <div class="info">
-    <label for="name">Your full name<input id="name" autocomplete="name" placeholder="First and last name"></label>
+    <label for="name"><span>Your full name <span class="req">Required</span></span><input id="name" autocomplete="name" placeholder="First and last name"></label>
     <label for="phone" id="phone-wrap" hidden>Phone number<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="So we can text you when it's ready"></label>
   </div>
   <fieldset class="deliv">
     <legend>Pickup or shipping? <span class="req">Required</span></legend>
-    <label class="opt-row"><input type="radio" name="delivery" id="d-pickup" value="pickup"><span><b>Pick up in Warren, MI</b><small>Free. Ready in 3 to 4 weeks. Pay by card or Venmo</small></span></label>
-    <label class="opt-row"><input type="radio" name="delivery" id="d-mail" value="mail"><span><b>Ship it to me</b><small>Ships in 3 to 4 weeks by USPS Ground, priced by your ZIP code and what you order. Card payment only</small></span></label>
+    <label class="opt-row"><input type="radio" name="delivery" id="d-pickup" value="pickup"><span><b>Pick up in Warren, MI</b><small>Free</small></span></label>
+    <label class="opt-row"><input type="radio" name="delivery" id="d-mail" value="mail"><span><b>Ship it to me</b><small>Ships USPS Ground</small></span></label>
     <label id="zip-wrap" hidden>Your ZIP code<input id="zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="5-digit ZIP"></label>
     <p class="note" id="ship-quote" hidden></p>
     <p class="note" id="mail-note" hidden>Checkout will ask for your mailing address. Shipped orders are paid by card or Apple Pay. Venmo is for pickup orders only.</p>
@@ -220,9 +220,8 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
     <ul id="summary" class="receipt"><li class="empty">Nothing picked yet. Choose a size on any item above.</li></ul>
     <div class="rtotal"><span>Total</span><b id="rtotal">$0</b></div>
     <p id="err" class="err" hidden></p>
-    <button id="card" class="btn" type="button">Pay with card or Apple Pay</button>
-    <p class="note">Secure checkout. Receipt emailed to you.</p>
-    <button id="venmo" class="btn ghost" type="button">Pay with Venmo (pickup only)</button>
+    <button id="card" class="btn" type="button">Complete checkout</button>
+    <button id="venmo" class="btn" type="button">Pay with Venmo (pickup only)</button>
     <p class="note" id="venmo-note"></p>
     <div id="vconf" class="vconf" hidden>
       <div class="pre-tag">Order saved</div>
@@ -241,7 +240,6 @@ textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--raised);bo
 
 <div class="bar"><div class="in">
   <div class="t"><small id="count">0 items</small><b id="total">$0</b></div>
-  <button class="btn" id="jump">Finish order</button>
 </div></div>
 
 <script>
@@ -262,15 +260,15 @@ const FIT = {
   beanie:{text:true, note:"One size fits most. Stretchy knit with a 3 inch fold-up cuff where the logo is embroidered."},
   womens:{note:"Women's cut with shaped front seams, a slightly longer back hem and thumbholes.", w:"Bust", extra:"Women's size",
     rows:{XS:["18 1/4","27 3/4","2"],S:["19 1/4","28 1/4","4-6"],M:["20 1/4","28 3/4","8-10"],L:["21 3/4","29 1/4","12-14"],XL:["23 1/4","29 3/4","16-18"],"2XL":["24 3/4","30 1/4","20-22"],"3XL":["26 3/4","30 3/4","24-26"],"4XL":["28 3/4","31 1/4","28-30"]}},
-  ls:{note:"Unisex athletic fit with raglan sleeves. Women usually go down one size.",
+  ls:{note:"Unisex athletic fit with raglan sleeves.",
     rows:{XS:["16","27"],S:["18","28"],M:["20","29"],L:["22 1/2","30"],XL:["24 1/2","31"],"2XL":["25 1/2","32"],"3XL":["27","33"],"4XL":["29 1/2","34"]}},
   zip:{note:"Unisex slim fit with thumbholes. It runs a little small, so size up if you're between sizes or like room to layer.",
     rows:{XS:["19 1/2","23 1/2"],S:["20 1/2","25"],M:["21 1/2","26 1/2"],L:["22 1/2","28 1/2"],XL:["23 1/2","29 1/2"],"2XL":["24 1/2","30 1/2"]}},
-  classic:{note:"Unisex classic fit, true to size. Women usually go down one size.",
+  classic:{note:"Unisex classic fit, true to size.",
     rows:{XS:["18","26"],S:["20","27"],M:["22","28"],L:["24","29"],XL:["26","30"],"2XL":["28","31"],"3XL":["30","32"],"4XL":["32","33"],"5XL":["34","34"]}},
-  lace:{note:"Men's fit with a roomy, slightly longer cut and stretchy side panels. Order your usual size. Women usually go down one size.",
+  lace:{note:"Men's fit with a roomy, slightly longer cut and stretchy side panels.",
     rows:{XS:["20 1/2","28"],S:["22","29"],M:["23 1/2","30"],L:["25","31"],XL:["26 1/2","32"],"2XL":["28","33"],"3XL":["30","33 1/2"],"4XL":["32","34"]}},
-  tee:{note:"Unisex tailored athletic fit with raglan sleeves. Women usually go down one size.",
+  tee:{note:"Unisex tailored athletic fit with raglan sleeves.",
     rows:{S:["18","27"],M:["20","28"],L:["22","29"],XL:["23 1/2","30 1/4"],"2XL":["25 1/2","31 1/4"],"3XL":["27 1/2","32 1/4"],"4XL":["29 1/2","33 1/4"],"5XL":["31 1/2","34 1/4"],"6XL":["33 1/2","35 1/4"]}},
 };
 function fitBlock(p){
@@ -283,7 +281,8 @@ function fitBlock(p){
     <p class="note">Inches, measured on the shirt laid flat. ${f.w||"Chest"} is armpit to armpit; length is top of the shoulder to the bottom hem. Easiest check: lay a shirt you like flat, measure it the same way and pick the closest size.</p></details>`;
 }
 const lines = {}, shown = {}, openFit = new Set();
-function resetLines(){P.forEach(p=>{shown[p.id]=p.colors[0][0];lines[p.id]=[{color:p.colors[0][0],size:"",qty:1}]})}
+const firstColor=p=>p.colors.length>1?"":p.colors[0][0];
+function resetLines(){P.forEach(p=>{shown[p.id]=p.colors[0][0];lines[p.id]=[{color:firstColor(p),size:"",qty:1}]})}
 resetLines();
 const imgFor=(p,c)=>IMG[(p.colors.find(x=>x[0]===c)||p.colors[0])[1]];
 const multi=p=>p.colors.length>1;
@@ -309,6 +308,7 @@ function shipQuote(it,zip){
   const lb=shipWeight(it); const col=zone-1;
   let price; const row=RATES.find(r=>lb<=r[0]);
   if(row) price=row[1][col]; else {const last=RATES[RATES.length-1][1][col], per=(last-RATES[RATES.length-2][1][col])/2; price=last+Math.ceil(lb-10)*per}
+  price=Math.max(0,price-3); /* $3 off every shipping quote */
   return {zone,lb,price:Math.round(price*100)/100};
 }
 const shipCost = ()=>{if(delivery()!=="mail")return 0;const q=shipQuote(items(),zipVal());return q?q.price:0};
@@ -330,21 +330,21 @@ function render(){
     c.innerHTML=`<img src="${IMG[key]}" width="${dm[0]}" height="${dm[1]}" alt="${p.name} in ${shown[p.id]}, front and back">
       <div class="body">
         <div class="title"><div class="num">${i+1}</div><div><h3>${p.name}</h3><p>${p.sub}</p></div></div>
-        <div class="colors">${multi(p)?'<span class="clab">Colors</span>'+p.colors.map(c=>`<button class="sw" aria-pressed="${c[0]===shown[p.id]}" data-c="${c[0]}">${c[0]}</button>`).join(""):'<span class="clab">Color: '+p.colors[0][0]+'</span>'}</div>
-        <div class="prices">${priceChips(p)}</div>
+
+        
         ${fitBlock(p)}
         <div class="lines"></div>
       </div>`;
-    c.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{shown[p.id]=b.dataset.c;const one=lines[p.id].length===1;lines[p.id].forEach(l=>{if(one||!l.size)l.color=b.dataset.c});render()});
+    c.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{shown[p.id]=b.dataset.c;render()});
     const fd=c.querySelector("details.fit"); if(fd) fd.addEventListener("toggle",()=>{fd.open?openFit.add(p.id):openFit.delete(p.id)});
     const lb=c.querySelector(".lines"); lb.style.display="flex"; lb.style.flexDirection="column"; lb.style.gap="10px";
     lines[p.id].forEach((l,j)=>{
       const row=document.createElement("div"); row.className="line";
       const opts=['<option value="">Pick a size</option>'].concat(SIZES.filter(s=>p.price[s]!=null).map(s=>`<option value="${s}" ${l.size===s?"selected":""}>${s} (${money(p.price[s])})</option>`)).join("");
-      row.innerHTML=(multi(p)&&lines[p.id].length>1?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color">${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
+      row.innerHTML=(multi(p)?`<select class="csel" id="co-${p.id}-${j}" aria-label="${p.name} color"><option value="" ${l.color?"":"selected"}>Pick a color</option>${p.colors.map(c=>`<option ${c[0]===l.color?"selected":""}>${c[0]}</option>`).join("")}</select>`:"")+`<select id="sz-${p.id}-${j}" aria-label="${p.name} size">${opts}</select>
         <div class="qty" ${l.size?"":"hidden"}><button aria-label="Fewer">−</button><output>${l.qty}</output><button aria-label="More">+</button></div>
         <div class="lineprice">${l.size?money(p.price[l.size]*l.qty):""}</div>`;
-      const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;shown[p.id]=l.color;render()};
+      const cs=row.querySelector(".csel"); if(cs) cs.onchange=e=>{l.color=e.target.value;if(l.color)shown[p.id]=l.color;render()};
       row.querySelector("select:not(.csel)").onchange=e=>{l.size=e.target.value; if(!l.size && lines[p.id].length>1) lines[p.id].splice(j,1); render()};
       const [minus,plus]=row.querySelectorAll(".qty button");
       minus.onclick=()=>{if(l.qty>1){l.qty--;render()}};
@@ -352,7 +352,7 @@ function render(){
       lb.appendChild(row);
       if(j>0){const rm=document.createElement("button");rm.className="rm";rm.textContent="Remove this one";rm.onclick=()=>{lines[p.id].splice(j,1);render()};lb.appendChild(rm)}
     });
-    if(on && Object.keys(p.price).length>1){const add=document.createElement("button");add.className="add";add.textContent=multi(p)?"+ Add another color or size":"+ Add another size";add.onclick=()=>{lines[p.id].push({color:shown[p.id],size:"",qty:1});render()};lb.appendChild(add)}
+    if(on && Object.keys(p.price).length>1){const add=document.createElement("button");add.className="add";add.textContent=multi(p)?"+ Add another color or size":"+ Add another size";add.onclick=()=>{lines[p.id].push({color:firstColor(p),size:"",qty:1});render()};lb.appendChild(add)}
     const old=box.querySelector(`section[data-id="${p.id}"]`);
     if(old){
       const oi=old.querySelector("img"), ni=c.querySelector("img");
@@ -376,7 +376,7 @@ function update(){
   $("#total").textContent=money(total); $("#count").textContent=n+(n===1?" item":" items");
   const ul=$("#summary"); ul.innerHTML=""; $("#rtotal").textContent=money(total);
   if(!it.length){const li=document.createElement("li");li.className="empty";li.textContent="Nothing picked yet. Choose a size on any item above.";ul.appendChild(li);return}
-  it.forEach(x=>{const li=document.createElement("li");const a=document.createElement("span");a.textContent=`${x.qty} x ${x.p.name}`;const s=document.createElement("small");s.textContent=x.size==="One size"?`${x.color}, one size`:`${x.color}, size ${x.size}`;a.appendChild(s);const b=document.createElement("b");b.textContent=money(x.cost);li.append(a,b);ul.appendChild(li)});
+  it.forEach(x=>{const li=document.createElement("li");const a=document.createElement("span");a.textContent=`${x.qty} x ${x.p.name}`;const s=document.createElement("small");s.textContent=x.size==="One size"?`${x.color}, one size`:`${x.color||"Color not picked yet"}, size ${x.size}`;if(!x.color)s.style.color="var(--warn)";a.appendChild(s);const b=document.createElement("b");b.textContent=money(x.cost);li.append(a,b);ul.appendChild(li)});
   {const dv=delivery();const li=document.createElement("li");const a=document.createElement("span");const b=document.createElement("b");
    if(dv==="mail"){const q=shipQuote(it,zipVal());
      if(q){a.textContent="Shipping to "+zipVal();b.textContent=money(q.price)}
@@ -395,14 +395,14 @@ $("#zip").addEventListener("input",e=>{const v=e.target.value.replace(/\D/g,"").
 document.querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener("change",update));
 if(isClosed()){$("#deadline").innerHTML="<b>Orders are closed.</b> Thanks to everyone who ordered!";$("#venmo").textContent="Orders are closed";$("#venmo").classList.add("off");}
 const orderProblem=()=>{const name=$("#name").value.trim(); const it=items();
-  return isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":""};
+  return isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":(()=>{const m=it.find(x=>!x.color);return m?`Pick a color for your ${m.p.name}.`:""})()||(!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":(delivery()==="mail"&&!shipQuote(it,zipVal()))?"Enter a valid 5-digit ZIP code so we can figure your shipping.":"")};
 $("#card").addEventListener("click",async()=>{
   const err=$("#err"); err.hidden=true; const btn=$("#card");
   const msg=orderProblem();
   if(msg){err.textContent=msg;err.hidden=false;
     if(!delivery()&&items().length&&$("#name").value.trim()){const f=$(".deliv");f.classList.add("need");f.scrollIntoView({behavior:"smooth",block:"center"})}
     return}
-  btn.disabled=true; const label=btn.textContent; btn.textContent="Opening secure checkout...";
+  btn.disabled=true; const label=btn.textContent; btn.textContent="Opening checkout...";
   try{
     const r=await fetch("/.netlify/functions/checkout",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({name:$("#name").value.trim(),delivery:delivery(),zip:zipVal(),items:items().map(x=>({id:x.p.id,color:x.color,size:x.size,qty:x.qty}))})});
@@ -417,11 +417,11 @@ $("#card").addEventListener("click",async()=>{
  if(q.get("paid")){const d=$("#deadline");d.innerHTML='<div class="pre-tag">Order received</div><p style="margin:0 0 8px;font-size:20px"><b>Thank you for your order!</b></p><div class="pre-row"><span>Receipt</span><b>Emailed to you</b></div><div class="pre-row"><span>Approx. ship date</span><b>Around Dec 14</b></div><p class="pre-note">You will be notified when your order is available or ships.</p>';d.scrollIntoView();history.replaceState(null,"",location.pathname)}
  else if(q.get("canceled")){
    try{const c=JSON.parse(sessionStorage.getItem("hts-cart")||"null");
-     if(c){P.forEach(p=>{if(Array.isArray(c.lines&&c.lines[p.id])){lines[p.id]=c.lines[p.id].filter(l=>p.colors.some(x=>x[0]===l.color)&&(l.size===""||p.price[l.size]!=null)).map(l=>({color:l.color,size:l.size,qty:Math.min(10,Math.max(1,l.qty|0))}));if(!lines[p.id].length)lines[p.id]=[{color:p.colors[0][0],size:"",qty:1}];shown[p.id]=lines[p.id][0].color}});
+     if(c){P.forEach(p=>{if(Array.isArray(c.lines&&c.lines[p.id])){lines[p.id]=c.lines[p.id].filter(l=>p.colors.some(x=>x[0]===l.color)&&(l.size===""||p.price[l.size]!=null)).map(l=>({color:l.color,size:l.size,qty:Math.min(10,Math.max(1,l.qty|0))}));if(!lines[p.id].length)lines[p.id]=[{color:firstColor(p),size:"",qty:1}];shown[p.id]=lines[p.id][0].color}});
        $("#name").value=c.name||""; if(c.delivery){const r=document.querySelector(`input[name="delivery"][value="${c.delivery}"]`);if(r)r.checked=true} $("#zip").value=c.zip||""; render()}}catch(_){}
    const e=$("#err");e.textContent="Checkout was canceled, so you weren't charged. Your picks are below if you want to try again.";e.hidden=false;history.replaceState(null,"",location.pathname)}}
 if(isClosed()){$("#card").textContent="Orders are closed";$("#card").classList.add("off");}
-$("#jump").onclick=()=>{ $(items().length?"#info-h":"#products").scrollIntoView({behavior:"smooth"}) };
+
 $("#phone").addEventListener("input",update);
 var vSaving=false, vSaved=null;
 function newCode(){const c="23456789ABCDEFGHJKMNPQRSTUVWXYZ";let o="";const r=crypto.getRandomValues(new Uint8Array(4));r.forEach(n=>o+=c[n%c.length]);return "HTS-"+o}
@@ -434,7 +434,7 @@ function venmoLink(amount,note){
 $("#venmo").addEventListener("click",async()=>{
   const err=$("#err"); err.hidden=true;
   const name=$("#name").value.trim(), phone=$("#phone").value.trim(), it=items();
-  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":phone.replace(/\D/g,"").length<10?"Add your phone number so we can text you when it's ready.":"";
+  const msg=isClosed()?"Orders closed on November 21.":!it.length?"Pick at least one item first.":(()=>{const m=it.find(x=>!x.color);return m?`Pick a color for your ${m.p.name}.`:""})()||(!name?"Add your name so Coach Chad knows whose order it is.":!delivery()?"Choose pickup in Warren or shipping before you pay.":delivery()==="mail"?"Venmo is for pickup orders only. Pay by card to have it shipped.":phone.replace(/\D/g,"").length<10?"Add your phone number so we can text you when it's ready.":"");
   if(msg){err.textContent=msg;err.hidden=false;
     if(!delivery()&&it.length&&name){const f=$(".deliv");f.classList.add("need");f.scrollIntoView({behavior:"smooth",block:"center"})}
     else if(delivery()==="pickup"&&name&&it.length) $("#phone").focus();
