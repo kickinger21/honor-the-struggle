@@ -54,7 +54,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Use POST." });
   if (!process.env.STRIPE_SECRET_KEY)
     return json(500, { error: "Card payments aren't set up yet. Please use Venmo for now." });
-  if (Date.now() >= CLOSE.getTime()) return json(400, { error: "Orders closed on November 21." });
+  if (Date.now() >= CLOSE.getTime()) return json(400, { error: "Orders closed on November 22." });
 
   let body;
   try {
@@ -121,8 +121,8 @@ exports.handler = async (event) => {
       submit: {
         message:
           delivery === "mail"
-            ? `Pre-order: printed after orders close Nov 21 and shipped in 3 to 4 weeks by USPS Ground to ZIP ${zip}. Please use an address in that ZIP code.`
-            : "Pre-order: printed after orders close Nov 21 and ready for free pickup in Warren, MI in 3 to 4 weeks.",
+            ? `Pre-order: printed after orders close Nov 22 and shipped in 3 to 4 weeks by USPS Ground to ZIP ${zip}. Please use an address in that ZIP code.`
+            : "Pre-order: printed after orders close Nov 22 and ready for free pickup in Warren, MI in 3 to 4 weeks.",
       },
     },
   };
